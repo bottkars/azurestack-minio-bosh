@@ -3,7 +3,8 @@ name: minio-azure
 templates:
   ctl.erb: bin/ctl
   health_check.erb: bin/health_check
-
+  ca.crt.erb: config/ca.crt
+  post-start.erb: bin/post-start
 packages:
 - minio
 
@@ -16,6 +17,9 @@ provides:
   type: server
   properties:
   - port
+  - credential.accesskey
+  - credential.secretkey
+
 
 properties:
   credential.accesskey:
@@ -31,5 +35,11 @@ properties:
     description: "PCF Tile version"
     default: ""
   custom_endpoint:
-    description: "Custom Storage Endpoint ( e.g. Azurestack https://azureaccountname.blob.custom.azurestack.endpoint )"
-    default: ""    
+    description: "Custom Storage Endpoint ( e.g. Azurestack local.azurestack.external  )"
+    default: ""
+  ca_cert:
+    description: |
+      PEM-encoded certificate used to sign the certificates of the custom endpoint
+      Required for AzureStack ASDK or a third-party CA.
+    default: ~  
+

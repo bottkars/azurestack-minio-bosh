@@ -25,20 +25,28 @@ BINPATH=/var/vcap/packages/minio
 mkdir -p ${RUN_DIR} ${LOG_DIR} ${CONFIG_DIR} ${STORE_DIR}
 chown -R vcap:vcap $RUN_DIR $LOG_DIR $CONFIG_DIR ${STORE_DIR}
 
+<% if_p('ca_cert') do %>
+  mkdir -p  ${CONFIG_DIR}/certs/CAs/
+  cp /var/vcap/jobs/minio-azure/config/ca.crt ${CONFIG_DIR}/certs/CAs
+<% end %>
+
 export MINIO_ACCESS_KEY="<%= p("credential.accesskey") %>"
 export MINIO_SECRET_KEY="<%= p("credential.secretkey") %>"
 export MINIO_PCF_TILE_VERSION=<%= p("pcf_tile_version") %>
 
-case $1 in
 
+case $1 in
   start)
     echo $$ > $PIDFILE
-    cp '/etc/hosts' '/etc/hosts.bak'
-    echo '127.0.0.1 <%= p("custom_endpoint") %>' >> '/etc/hosts'
-    exec ${BINPATH}/minio gateway --address ':<%= p("port") %>' azure 'https://<%= p("custom_endpoint") %>' \
+    ###
+    # we copy suffix temoporary to hosts to mitigate dns resolving
+    # the backup hosts file will be restored fro post job
+    cp /etc/hosts /etc/hosts.bak
+    echo '127.0.0.1 <%= p("custom_endpoint") %>' >> /etc/hosts
+    exec ${BINPATH}/minio gateway --config-dir $CONFIG_DIR \
+         --address ':<%= p("port") %>' azure 'https://<%= p("custom_endpoint") %>' \
          >> ${LOG_DIR}/minio-server.stdout.log \
-         2>> ${LOG_DIR}/minio-server.stderr.log
-    mv '/etc/hosts.bak' '/etc/hosts'
+         2>> ${LOG_DIR}/minio-server.stderr.lo
     ;;
 
   stop)
