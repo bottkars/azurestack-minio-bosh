@@ -30,3 +30,6 @@ properties:
   pcf_tile_version:
     description: "PCF Tile version"
     default: ""
+  custom_endpoint:
+    description: "Custom Storage Endpoint ( e.g. Azurestack https://azureaccountname.blob.custom.azurestack.endpoint )"
+    default: ""    

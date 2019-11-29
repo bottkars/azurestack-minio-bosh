@@ -33,9 +33,12 @@ case $1 in
 
   start)
     echo $$ > $PIDFILE
-    exec ${BINPATH}/minio gateway --address ':<%= p("port") %>' azure \
+    cp '/etc/hosts' '/etc/hosts.bak'
+    echo '127.0.0.1 <%= p("custom_endpoint") %>' >> '/etc/hosts'
+    exec ${BINPATH}/minio gateway --address ':<%= p("port") %>' azure 'https://<%= p("custom_endpoint") %>' \
          >> ${LOG_DIR}/minio-server.stdout.log \
          2>> ${LOG_DIR}/minio-server.stderr.log
+    mv '/etc/hosts.bak' '/etc/hosts'
     ;;
 
   stop)
